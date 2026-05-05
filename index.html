@@ -546,7 +546,7 @@
       </div>
       <div class="reg-form">
         <h3>Přihláška na Ninja den</h3>
-        <form onsubmit="handleSubmit(event)">
+        <form action="https://n8n.webdo24.cz/webhook/new-lead" method="POST" target="webhook-frame" onsubmit="handleSubmit(event)">
           <div class="form-2col">
             <div class="form-group">
               <label for="child_name">Jméno dítěte</label>
@@ -586,15 +586,6 @@
           <div id="form-status" style="margin-top:1rem;padding:0.75rem 1rem;border-radius:10px;font-size:0.9rem;font-weight:600;text-align:center;display:none;"></div>
         </form>
         <iframe name="webhook-frame" style="display:none"></iframe>
-        <form id="fallback-form" action="https://n8n.webdo24.cz/webhook/new-lead" method="POST" target="webhook-frame" style="display:none">
-          <input type="hidden" name="child_name" id="fb_child_name">
-          <input type="hidden" name="child_age" id="fb_child_age">
-          <input type="hidden" name="parent_name" id="fb_parent_name">
-          <input type="hidden" name="phone" id="fb_phone">
-          <input type="hidden" name="email" id="fb_email">
-          <input type="hidden" name="health_notes" id="fb_health_notes">
-          <input type="hidden" name="webID" value="ninja-ngjj.vercel.app" id="fb_webID">
-        </form>
       </div>
     </div>
   </div>
@@ -606,9 +597,6 @@
 
 <script>
 function handleSubmit(e) {
-  e.preventDefault();
-  console.log('[Ninja] Submit triggered');
-
   const form = e.target;
   const btn = form.querySelector('.btn-register');
   const status = document.getElementById('form-status');
@@ -617,78 +605,17 @@ function handleSubmit(e) {
   btn.disabled = true;
   if (status) { status.style.display = 'none'; }
 
-  try {
-    const data = Object.fromEntries(new FormData(form).entries());
-    console.log('[Ninja] Data:', data);
-
-    fetch('https://n8n.webdo24.cz/webhook/new-lead', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    .then(response => {
-      console.log('[Ninja] Response status:', response.status);
-      if (response.ok) {
-        btn.textContent = '✅ Přihláška odeslána! Ozveme se do 2 hodin.';
-        btn.style.background = '#16a34a';
-        form.reset();
-        if (status) {
-          status.textContent = 'Děkujeme! Vaše přihláška byla úspěšně odeslána.';
-          status.style.background = '#dcfce7';
-          status.style.color = '#166534';
-          status.style.display = 'block';
-        }
-      } else {
-        throw new Error('HTTP ' + response.status);
-      }
-    })
-    .catch(err => {
-      console.error('[Ninja] Fetch failed:', err);
-      // Fallback: hidden form submit do iframe (obejde CORS)
-      const fb = document.getElementById('fallback-form');
-      if (fb) {
-        document.getElementById('fb_child_name').value = data.child_name || '';
-        document.getElementById('fb_child_age').value = data.child_age || '';
-        document.getElementById('fb_parent_name').value = data.parent_name || '';
-        document.getElementById('fb_phone').value = data.phone || '';
-        document.getElementById('fb_email').value = data.email || '';
-        document.getElementById('fb_health_notes').value = data.health_notes || '';
-        document.getElementById('fb_webID').value = data.webID || 'ninja-ngjj.vercel.app';
-        fb.submit();
-        console.log('[Ninja] Fallback form submitted');
-        btn.textContent = '✅ Přihláška odeslána! Ozveme se do 2 hodin.';
-        btn.style.background = '#16a34a';
-        form.reset();
-        if (status) {
-          status.textContent = 'Děkujeme! Vaše přihláška byla úspěšně odeslána.';
-          status.style.background = '#dcfce7';
-          status.style.color = '#166534';
-          status.style.display = 'block';
-        }
-      } else {
-        btn.textContent = '❌ Chyba při odesílání. Zkuste to znovu.';
-        btn.style.background = '#dc2626';
-        btn.disabled = false;
-        if (status) {
-          status.textContent = 'Chyba při odesílání: ' + err.message;
-          status.style.background = '#fee2e2';
-          status.style.color = '#991b1b';
-          status.style.display = 'block';
-        }
-      }
-    });
-  } catch (err) {
-    console.error('[Ninja] Unexpected error:', err);
-    btn.textContent = '❌ Chyba. Zkuste to znovu.';
-    btn.style.background = '#dc2626';
-    btn.disabled = false;
+  setTimeout(function() {
+    btn.textContent = '✅ Přihláška odeslána! Ozveme se do 2 hodin.';
+    btn.style.background = '#16a34a';
+    form.reset();
     if (status) {
-      status.textContent = 'Chyba: ' + err.message;
-      status.style.background = '#fee2e2';
-      status.style.color = '#991b1b';
+      status.textContent = 'Děkujeme! Vaše přihláška byla úspěšně odeslána.';
+      status.style.background = '#dcfce7';
+      status.style.color = '#166534';
       status.style.display = 'block';
     }
-  }
+  }, 1000);
 }
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
